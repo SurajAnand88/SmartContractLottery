@@ -7,7 +7,6 @@ import {HelperConfig} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
 import {console} from "forge-std/console.sol";
 
-
 contract RaffleTest is Test {
     Raffle public raffle;
     HelperConfig public helperConfig;
@@ -54,11 +53,10 @@ contract RaffleTest is Test {
 
     function testRaffleEnterWhenPayingEnoughEntranceFee() public funder {
         // send tx with a specific gas using vm.txGasPrice();
-        // vm.txGasPrice(GAS_PRICE);  
+        // vm.txGasPrice(GAS_PRICE);
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
         assert(raffle.getPlayerAtIndex(0) == address(PLAYER));
         // console.log(tx.gasprice);
-
     }
 
     function testEntraceFee() public {
@@ -77,11 +75,10 @@ contract RaffleTest is Test {
         assert(address(raffle).balance == (totalPlayers - 1) * INITIAL_ENTRANCE_FEE);
     }
 
-
     modifier funder() {
         // vm.prank(PLAYER);
         // vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
-        hoax(PLAYER,PLAYER_INITIAL_BALANCE);
+        hoax(PLAYER, PLAYER_INITIAL_BALANCE);
         _;
     }
 }
