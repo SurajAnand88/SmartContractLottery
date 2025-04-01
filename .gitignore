@@ -6,9 +6,15 @@ out/
 !/broadcast
 /broadcast/*/31337/
 /broadcast/**/dry-run/
+broadcast/
+lib/
+node_modules/
 
 # Docs
 docs/
 
 # Dotenv file
 .env
+.qodo
+.DS_Store
+.gas-snapshot
