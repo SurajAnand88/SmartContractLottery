@@ -34,7 +34,7 @@ contract RaffleTest is Test {
         // console.log("HelperConfig deployed at", address(helperConfig));
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
         //vm.deal giving player initial balance which is required for transactions;
-        vm.deal(PLAYER,PLAYER_INITIAL_BALANCE);
+        vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
         entranceFee = config.entranceFee;
         interval = config.interval;
         vrfCoordinator = config.vrfCoordinator;
@@ -47,19 +47,19 @@ contract RaffleTest is Test {
         // console.log(config.vrfCoordinator);
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
+
     function testEnterRaffleEvent() public {
         vm.prank(PLAYER);
-        vm.expectEmit(true,false,false,false,address(raffle));
+        vm.expectEmit(true, false, false, false, address(raffle));
         emit EnteredRaffle(address(PLAYER));
 
-        raffle.enterRaffle{value:INITIAL_ENTRANCE_FEE}();
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
     }
-
 
     function testraffleRevertsWhenYouDontPayEnoughETH() public {
         vm.prank(PLAYER);
         vm.expectRevert(Raffle.Raffle_notEnoughETHSent.selector);
-        raffle.enterRaffle{value:0.1 ether}();
+        raffle.enterRaffle{value: 0.1 ether}();
     }
 
     function testRaffleEnterWhenPayingEnoughEntranceFee() public funder {
@@ -90,14 +90,14 @@ contract RaffleTest is Test {
         //Arrange
         vm.prank(PLAYER);
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
-        vm.warp(block.timestamp + interval +1);
-        vm.roll(block.number +1);
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
         raffle.performUpKeep("");
 
         //Act
         vm.prank(PLAYER);
         vm.expectRevert(Raffle.Raffle_CalculatingWinner.selector);
-        raffle.enterRaffle{value:INITIAL_ENTRANCE_FEE}();
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
 
         //Assert
     }
