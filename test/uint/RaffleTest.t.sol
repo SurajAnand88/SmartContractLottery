@@ -11,6 +11,9 @@ contract RaffleTest is Test {
     Raffle public raffle;
     HelperConfig public helperConfig;
 
+    event EnteredRaffle(address indexed player);
+    event PickedWinner(address winner);
+
     address public PLAYER = makeAddr("Player");
     uint256 public constant PLAYER_INITIAL_BALANCE = 20 ether;
     uint160 public constant INITIAL_ENTRANCE_FEE = 0.25 ether;
@@ -31,7 +34,7 @@ contract RaffleTest is Test {
         // console.log("HelperConfig deployed at", address(helperConfig));
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
         //vm.deal giving player initial balance which is required for transactions;
-        // vm.deal(PLAYER,PLAYER_INITIAL_BALANCE);
+        vm.deal(PLAYER,PLAYER_INITIAL_BALANCE);
         entranceFee = config.entranceFee;
         interval = config.interval;
         vrfCoordinator = config.vrfCoordinator;
@@ -44,11 +47,19 @@ contract RaffleTest is Test {
         // console.log(config.vrfCoordinator);
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
+    function testEnterRaffleEvent() public {
+        vm.prank(PLAYER);
+        vm.expectEmit(true,false,false,false,address(raffle));
+        emit EnteredRaffle(address(PLAYER));
+
+        raffle.enterRaffle{value:INITIAL_ENTRANCE_FEE}();
+    }
+
 
     function testraffleRevertsWhenYouDontPayEnoughETH() public {
         vm.prank(PLAYER);
-        vm.expectRevert();
-        raffle.enterRaffle{value: 0.1 ether}();
+        vm.expectRevert(Raffle.Raffle_notEnoughETHSent.selector);
+        raffle.enterRaffle{value:0.1 ether}();
     }
 
     function testRaffleEnterWhenPayingEnoughEntranceFee() public funder {
@@ -73,6 +84,22 @@ contract RaffleTest is Test {
         }
         assertEq(raffle.getTotalPlayers(), totalPlayers - 1);
         assert(address(raffle).balance == (totalPlayers - 1) * INITIAL_ENTRANCE_FEE);
+    }
+
+    function testDontAllowPlayersToEnterRaffleWhileRaffleIsCalculating() public {
+        //Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        vm.warp(block.timestamp + interval +1);
+        vm.roll(block.number +1);
+        raffle.performUpKeep("");
+
+        //Act
+        vm.prank(PLAYER);
+        vm.expectRevert(Raffle.Raffle_CalculatingWinner.selector);
+        raffle.enterRaffle{value:INITIAL_ENTRANCE_FEE}();
+
+        //Assert
     }
 
     modifier funder() {
