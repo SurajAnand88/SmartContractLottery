@@ -52,7 +52,7 @@ contract FundSubscription is GetChainIds, Script {
             vm.stopBroadcast();
         } else {
             vm.startBroadcast();
-            LinkToken(linkToken).transferAndCall(vrfCoordinator,FUNDED_AMOUNT,abi.encode(subscriptionId));
+            LinkToken(linkToken).transferAndCall(vrfCoordinator, FUNDED_AMOUNT, abi.encode(subscriptionId));
             vm.stopBroadcast();
         }
     }
