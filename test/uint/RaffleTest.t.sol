@@ -86,22 +86,22 @@ contract RaffleTest is Test {
         assert(address(raffle).balance == (totalPlayers - 1) * INITIAL_ENTRANCE_FEE);
     }
 
-    // function testDontAllowPlayersToEnterRaffleWhileRaffleIsCalculating() public {
-    //     //Arrange
-    //     vm.prank(PLAYER);
-    //     raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
-    //     raffle.performUpKeep("");
+    function testDontAllowPlayersToEnterRaffleWhileRaffleIsCalculating() public {
+        //Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        raffle.performUpKeep("");
+        console.log(address(raffle));
 
-    //     //Act
-    //     vm.prank(PLAYER);
-    //     vm.expectRevert(Raffle.Raffle_CalculatingWinner.selector);
-    //     raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        //Act
+        vm.prank(PLAYER);
+        vm.expectRevert(Raffle.Raffle_CalculatingWinner.selector);
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
 
-    //     //Assert
-
-    // }
+        //Assert
+    }
 
     modifier funder() {
         // vm.prank(PLAYER);
