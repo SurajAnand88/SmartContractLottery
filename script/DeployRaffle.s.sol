@@ -5,7 +5,8 @@ import {Script} from "forge-std/Script.sol";
 import {Raffle} from "src/Raffle.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {console} from "forge-std/console.sol";
-import {CreateSubscription} from "script/CreateSubscription.s.sol";
+import {CreateSubscription, FundSubscription, AddConsumer} from "script/CreateSubscription.s.sol";
+import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
 
 contract DeployRaffle is Script {
     function deployRaffleContract() public returns (Raffle, HelperConfig) {
@@ -17,6 +18,10 @@ contract DeployRaffle is Script {
             CreateSubscription createSubscription = new CreateSubscription();
             (config.subscriptionId, config.vrfCoordinator) =
                 createSubscription.createSubscriptionId(config.vrfCoordinator);
+
+            //Fund the subscription
+            FundSubscription fundSubscription = new FundSubscription();
+            fundSubscription.fundSubscription(config.vrfCoordinator, config.subscriptionId, config.link);
         }
 
         vm.startBroadcast();

@@ -58,7 +58,7 @@ contract HelperConfig is Script, GetChainIds {
             interval: 30,
             vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
             gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
-            subscriptionId: 0,
+            subscriptionId: 90408319092427918692949180483022735124383284755486992522396419863317981140589,
             callBackGasLimit: 500000,
             link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
         });
