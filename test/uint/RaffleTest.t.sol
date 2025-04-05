@@ -149,8 +149,12 @@ contract RaffleTest is Test {
 
     function testPerformUpKeepToRevertIfUpkeepNeededIsFalse() public funder {
         //Arrange
+        uint256 currentBalance;
+        uint256 numberOfPlayers;
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
-        vm.expectRevert(abi.encodeWithSelector(Raffle.Raffle__UpKeepNotNeeded.selector, 2.5e17, 1, 0));
+        currentBalance = INITIAL_ENTRANCE_FEE;
+        numberOfPlayers = 1;
+        vm.expectRevert(abi.encodeWithSelector(Raffle.Raffle__UpKeepNotNeeded.selector, currentBalance, numberOfPlayers, 0));
         // Act
         raffle.performUpKeep("");
 
