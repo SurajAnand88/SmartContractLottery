@@ -41,17 +41,7 @@ contract DeployRaffle is Script {
         return (raffle, helperConfig);
     }
 
-    function run() public returns (Raffle) {
-        // HelperConfig helperConfig = new HelperConfig();
-        // HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
-        // Raffle raffle = new Raffle(
-        //     config.entranceFee,
-        //     config.interval,
-        //     config.vrfCoordinator,
-        //     config.gasLane,
-        //     config.subscriptionId,
-        //     config.callBackGasLimit
-        // );
-        // return raffle;
+    function run() public {
+        deployRaffleContract();
     }
 }

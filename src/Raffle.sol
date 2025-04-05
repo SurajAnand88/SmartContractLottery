@@ -124,6 +124,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
             revert Raffle__UpKeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
         }
 
+        s_raffleState = RaffleState.CALCULATING;
         VRFV2PlusClient.RandomWordsRequest memory request = VRFV2PlusClient.RandomWordsRequest({
             keyHash: i_keyHash,
             subId: i_subscriptionId,

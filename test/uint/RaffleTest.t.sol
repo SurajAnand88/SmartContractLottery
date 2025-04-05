@@ -93,11 +93,11 @@ contract RaffleTest is Test {
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
         raffle.performUpKeep("");
-        console.log(address(raffle));
+        // console.log(address(raffle));
 
         //Act
+        vm.expectRevert(Raffle.Raffle_RaffleNotOpened.selector);
         vm.prank(PLAYER);
-        vm.expectRevert(Raffle.Raffle_CalculatingWinner.selector);
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
 
         //Assert
