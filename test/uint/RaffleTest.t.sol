@@ -124,7 +124,15 @@ contract RaffleTest is Test {
         //Assert
         assert(!upKeepNeeded);
     }
+    function testCheckUpKeepReturnsFalseIfNotEnoughTimeHasPassed() public funder{
+        //Arrang
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
 
+        //Acc
+        (bool upKeepNeeded, ) = raffle.checkUpKeep("");
+        //Assert
+        assert(!upKeepNeeded);
+    }
     modifier funder() {
         // vm.prank(PLAYER);
         // vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
