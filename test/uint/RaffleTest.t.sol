@@ -105,8 +105,8 @@ contract RaffleTest is Test {
 
     function testCheckUpKeepReturnsFalseIfItHasNoBalance() public {
         //Arrange
-        vm.warp(block.timestamp+ interval +1);
-        vm.roll(block.number +1);
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
         //Act
         (bool check,) = raffle.checkUpKeep("");
         //Assert
@@ -114,20 +114,16 @@ contract RaffleTest is Test {
     }
 
     function testCheckUpKeepReturnsFalseIfRaffleStateIsNotOpened() public funder {
-        //Arrange 
-        vm.warp(block.timestamp + interval +1);
-        vm.roll(block.number+1);
-        
-        //Act
+        //Arrange
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
         raffle.performUpKeep("");
-
+        //Act
+        (bool upKeepNeeded,) = raffle.checkUpKeep("");
         //Assert
-        (bool upKeepNeeded, ) = raffle.checkUpKeep("");
         assert(!upKeepNeeded);
-
     }
-    
 
     modifier funder() {
         // vm.prank(PLAYER);
