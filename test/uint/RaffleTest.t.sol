@@ -26,6 +26,7 @@ contract RaffleTest is Test {
     uint256 subscriptionId;
     uint32 callBackGasLimit;
     address link;
+    uint256 length;
 
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
@@ -41,6 +42,8 @@ contract RaffleTest is Test {
         subscriptionId = config.subscriptionId;
         callBackGasLimit = config.callBackGasLimit;
         link = config.link;
+        //getting length of the Players to not reading this everytime from storage (gas optimization)
+        length = raffle.getTotalPlayers();
     }
 
     function testInitialRaffleState() public view {
@@ -124,15 +127,36 @@ contract RaffleTest is Test {
         //Assert
         assert(!upKeepNeeded);
     }
-    function testCheckUpKeepReturnsFalseIfNotEnoughTimeHasPassed() public funder{
+
+    function testCheckUpKeepReturnsFalseIfNotEnoughTimeHasPassed() public funder {
         //Arrang
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
 
-        //Acc
-        (bool upKeepNeeded, ) = raffle.checkUpKeep("");
+        //Act
+        (bool upKeepNeeded,) = raffle.checkUpKeep("");
         //Assert
         assert(!upKeepNeeded);
     }
+
+    function testChangeRaffleStateToBeChanged() public funder {
+        //Arrange
+
+        //Act
+        raffle.changeRaffleState();
+        //Assert
+        assert(raffle.getRaffleState() == Raffle.RaffleState.CALCULATING);
+    }
+
+    function testPerformUpKeepToRevertIfUpkeepNeededIsFalse() public funder {
+        //Arrange
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        vm.expectRevert(abi.encodeWithSelector(Raffle.Raffle__UpKeepNotNeeded.selector, 2.5e17, 1, 0));
+        // Act
+        raffle.performUpKeep("");
+
+        //Assert
+    }
+
     modifier funder() {
         // vm.prank(PLAYER);
         // vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
