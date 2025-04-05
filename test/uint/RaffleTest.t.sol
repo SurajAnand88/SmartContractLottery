@@ -157,6 +157,16 @@ contract RaffleTest is Test {
         //Assert
     }
 
+    function testCheckPerformUpKeepCanOnlyRunIfUpKeepNeededIsTrue() public {
+        //Arrange
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+
+        //Act / Assert
+        raffle.performUpKeep("");
+    }
+
     modifier funder() {
         // vm.prank(PLAYER);
         // vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
