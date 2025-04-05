@@ -25,14 +25,13 @@ contract RaffleTest is Test {
     bytes32 gasLane;
     uint256 subscriptionId;
     uint32 callBackGasLimit;
+    address link;
 
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
-        // console.log("Deploying Raffle");
         (raffle, helperConfig) = deployer.deployRaffleContract();
-        // console.log("Raffle deployed at" ,address(raffle));
-        // console.log("HelperConfig deployed at", address(helperConfig));
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
+
         //vm.deal giving player initial balance which is required for transactions;
         vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
         entranceFee = config.entranceFee;
@@ -41,6 +40,7 @@ contract RaffleTest is Test {
         gasLane = config.gasLane;
         subscriptionId = config.subscriptionId;
         callBackGasLimit = config.callBackGasLimit;
+        link = config.link;
     }
 
     function testInitialRaffleState() public view {
@@ -102,6 +102,32 @@ contract RaffleTest is Test {
 
         //Assert
     }
+
+    function testCheckUpKeepReturnsFalseIfItHasNoBalance() public {
+        //Arrange
+        vm.warp(block.timestamp+ interval +1);
+        vm.roll(block.number +1);
+        //Act
+        (bool check,) = raffle.checkUpKeep("");
+        //Assert
+        assert(!check);
+    }
+
+    function testCheckUpKeepReturnsFalseIfRaffleStateIsNotOpened() public funder {
+        //Arrange 
+        vm.warp(block.timestamp + interval +1);
+        vm.roll(block.number+1);
+        
+        //Act
+        raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        raffle.performUpKeep("");
+
+        //Assert
+        (bool upKeepNeeded, ) = raffle.checkUpKeep("");
+        assert(!upKeepNeeded);
+
+    }
+    
 
     modifier funder() {
         // vm.prank(PLAYER);
