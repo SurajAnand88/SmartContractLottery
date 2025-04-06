@@ -34,6 +34,7 @@ pragma solidity 0.8.19;
 import {VRFConsumerBaseV2Plus} from
     "lib/chainlink-brownie-contracts/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "lib/chainlink-brownie-contracts/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {console} from "forge-std/console.sol";
 
 contract Raffle is VRFConsumerBaseV2Plus {
     // Type Declaration
@@ -86,6 +87,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     error Raffle_CalculatingWinner();
     error Raffle_RaffleNotOpened();
     error Raffle__UpKeepNotNeeded(uint256 balance, uint256 length, uint256 raffleState);
+
     // Modifiers
 
     // Functions
@@ -146,7 +148,11 @@ contract Raffle is VRFConsumerBaseV2Plus {
         return i_entranceFee;
     }
 
-    function fulfillRandomWords(uint256, /*requestId*/ uint256[] calldata randomWords) internal override {
+    function fulfillRandomWords(
+        uint256,
+        /*requestId*/
+        uint256[] calldata randomWords
+    ) internal override {
         uint256 indexOfRecentWinner = randomWords[0] % s_players.length;
         recentWinner = s_players[indexOfRecentWinner];
         (bool success,) = recentWinner.call{value: address(this).balance}("");
@@ -154,6 +160,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         if (!success) {
             revert Raffle_TransferFailed();
         }
+        s_raffleState = RaffleState.OPEN;
         s_players = new address payable[](0);
         s_lastTimeStamp = block.timestamp;
         emit PickedWinner(recentWinner);
@@ -173,5 +180,13 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     function changeRaffleState() public {
         s_raffleState = RaffleState.CALCULATING;
+    }
+
+    function getLastTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    function getRecentWinner() public view returns (address) {
+        return recentWinner;
     }
 }

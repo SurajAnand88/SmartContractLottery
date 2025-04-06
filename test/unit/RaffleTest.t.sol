@@ -187,6 +187,43 @@ contract RaffleTest is Test {
         VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
     }
 
+    function testFulFillRandomWordsToCallAndSelectTheWinnerAndResetTheRaffle() public raffleEntered {
+        //Arrange
+        uint160 totalPlayers = 3;
+        uint160 startingIndex = 1;
+
+        for (uint160 i = startingIndex; i < startingIndex + totalPlayers; i++) {
+            address player = address(uint160(i));
+            hoax(player, PLAYER_INITIAL_BALANCE);
+            raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        }
+        uint256 startingTimeStamp = raffle.getLastTimeStamp();
+        uint256 winnerStartingBalance = PLAYER_INITIAL_BALANCE - INITIAL_ENTRANCE_FEE;
+        //Act
+        vm.recordLogs();
+        raffle.performUpKeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        // vm.expectRevert(Raffle.Raffle_TransferFailed.selector);
+        VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(uint256(requestId), address(raffle));
+
+        //Assert
+        Raffle.RaffleState raffleState = raffle.getRaffleState();
+        address recentWinner = raffle.getRecentWinner();
+        uint256 winnerBalance = address(recentWinner).balance;
+        uint256 endingTimestamp = raffle.getLastTimeStamp();
+        uint256 totalPrizeMoney = INITIAL_ENTRANCE_FEE + (totalPlayers * INITIAL_ENTRANCE_FEE);
+
+        assert(winnerBalance == totalPrizeMoney + winnerStartingBalance);
+        assert(uint256(raffleState) == 0);
+        assert(endingTimestamp > startingTimeStamp);
+    }
+
+    // function testFulFillRandomWordsToRevertAfterFailingToSendThePrizeMoney() public raffleEntered{
+
+    // }
+
     modifier funder() {
         hoax(PLAYER, PLAYER_INITIAL_BALANCE);
         _;
