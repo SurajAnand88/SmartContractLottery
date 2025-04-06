@@ -7,6 +7,8 @@ import {HelperConfig} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
 import {console} from "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
+import {VRFCoordinatorV2_5Mock} from
+    "../../lib/chainlink-brownie-contracts/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 contract RaffleTest is Test {
     Raffle public raffle;
@@ -43,6 +45,7 @@ contract RaffleTest is Test {
         subscriptionId = config.subscriptionId;
         callBackGasLimit = config.callBackGasLimit;
         link = config.link;
+
         //getting length of the Players to not reading this everytime from storage (gas optimization)
         length = raffle.getTotalPlayers();
     }
@@ -179,9 +182,12 @@ contract RaffleTest is Test {
         assert(raffleState == Raffle.RaffleState.CALCULATING);
     }
 
+    function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpKeep(uint256 randomRequestId) public raffleEntered {
+        vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
+        VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
+    }
+
     modifier funder() {
-        // vm.prank(PLAYER);
-        // vm.deal(PLAYER, PLAYER_INITIAL_BALANCE);
         hoax(PLAYER, PLAYER_INITIAL_BALANCE);
         _;
     }
