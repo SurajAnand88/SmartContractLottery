@@ -3,14 +3,14 @@ pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
-import {HelperConfig} from "script/HelperConfig.s.sol";
+import {HelperConfig, GetChainIds} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
 import {console} from "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {VRFCoordinatorV2_5Mock} from
     "../../lib/chainlink-brownie-contracts/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
-contract RaffleTest is Test {
+contract RaffleTest is GetChainIds, Test {
     Raffle public raffle;
     HelperConfig public helperConfig;
 
@@ -182,12 +182,16 @@ contract RaffleTest is Test {
         assert(raffleState == Raffle.RaffleState.CALCULATING);
     }
 
-    function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpKeep(uint256 randomRequestId) public raffleEntered {
+    function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpKeep(uint256 randomRequestId)
+        public
+        raffleEntered
+        skipFork
+    {
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
         VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
     }
 
-    function testFulFillRandomWordsToCallAndSelectTheWinnerAndResetTheRaffle() public raffleEntered {
+    function testFulFillRandomWordsToCallAndSelectTheWinnerAndResetTheRaffle() public raffleEntered skipFork {
         //Arrange
         uint160 totalPlayers = 3;
         uint160 startingIndex = 1;
@@ -233,6 +237,13 @@ contract RaffleTest is Test {
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
         raffle.enterRaffle{value: INITIAL_ENTRANCE_FEE}();
+        _;
+    }
+
+    modifier skipFork() {
+        if (block.chainid != LOCAL_CHAINID) {
+            return;
+        }
         _;
     }
 }
